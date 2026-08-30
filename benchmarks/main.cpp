@@ -40,4 +40,18 @@ static void BM_StackAllocation(benchmark::State& state) {
 }
 BENCHMARK(BM_StackAllocation);
 
+static void BM_ArenaAllocatorTemplate(benchmark::State& state){
+    LinearAllocator arena(10000 * sizeof(Entity));
+    for(auto _ : state){
+        for(int i = 0; i < 10000; ++i){
+            Entity* e = arena.Allocate<Entity>();
+            benchmark::DoNotOptimize(e);
+        }
+        arena.Reset();
+    }
+}
+BENCHMARK(BM_ArenaAllocatorTemplate);
+
+
+
 BENCHMARK_MAIN();
