@@ -1,11 +1,10 @@
 #ifndef LINEAR_ALLOCATOR_HPP
 #define LINEAR_ALLOCATOR_HPP
 
-#include <bit>
-#include <cassert>
 #include <cstddef>
-#include <iterator>
-#include <new>
+#include <utility>
+#include <bit>
+
 
 class LinearAllocator {
   private:
@@ -14,50 +13,40 @@ class LinearAllocator {
     std::size_t Offset{0};
 
   public:
-    LinearAllocator(std::size_t Size) : Capacity{Size} { StartPtr = new std::byte[Size]; }
-
-    ~LinearAllocator() { delete[] StartPtr; }
+    explicit LinearAllocator(std::size_t Size);
+    ~LinearAllocator();
 
     LinearAllocator(const LinearAllocator&) = delete;
     LinearAllocator& operator=(const LinearAllocator&) = delete;
 
-    LinearAllocator(LinearAllocator&& other) noexcept
-        : StartPtr{other.StartPtr}
-        , Capacity{other.Capacity}
-        , Offset{other.Offset}
-    {
-        other.StartPtr = nullptr;
-        other.Capacity = 0;
-        other.Offset = 0;
-    }
+    LinearAllocator(LinearAllocator&& other) noexcept;
+    LinearAllocator& operator=(LinearAllocator&& other) noexcept;
 
-    LinearAllocator& operator=(LinearAllocator&& other) noexcept {
-      if(this != &other){
-        delete[] StartPtr;
-        Capacity = other.Capacity;
-        StartPtr = other.StartPtr;
-        Offset = other.Offset;
-  
-        other.StartPtr = nullptr;
-        other.Capacity = 0;
-        other.Offset = 0;
-      }
-      return *this;
-    }
-
-    [[nodiscard]]void* Allocate(std::size_t Size, std::size_t Alignment = alignof(std::max_align_t)) noexcept {
-        
-      Alignment = std::bit_ceil(Alignment);
+    [[nodiscard]]
+    void* Allocate(std::size_t Size, std::size_t Alignment) noexcept {
+        //Alignment = std::bit_ceil(Alignment);
         std::size_t AlignedOffset = (Offset + Alignment - 1) & ~(Alignment - 1);
 
         if (AlignedOffset + Size > Capacity)
             return nullptr;
+
         void* ResultPtr = StartPtr + AlignedOffset;
         Offset = AlignedOffset + Size;
 
         return ResultPtr;
     }
-    void Reset() noexcept { Offset = 0; }
+    void Reset() noexcept;
+
+    template<typename T, typename... Args>
+    T* Allocate(Args&&... args) noexcept{
+        void* memory = Allocate(sizeof(T), alignof(T));
+        if(!memory) return nullptr;
+        return new (memory) T(std::forward<Args>(args)...);
+    }
+
+    [[nodiscard]] std::size_t get_size() const noexcept;
+    [[nodiscard]] std::size_t get_used() const noexcept;
+    [[nodiscard]] std::size_t get_remaining() const noexcept;
 };
 
-#endif // !LINEAR_ALLOCATOR_HPP
+#endif

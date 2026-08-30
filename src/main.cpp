@@ -20,9 +20,20 @@ int main() {
     void* mem = arena.Allocate(sizeof(Player), alignof(Player));
     Player* P1 = new (mem) Player(42, 100.0f);
 
+    Player* P2 = arena.Allocate<Player>(22, 90.0f);
+
     std::cout << "Health: " << P1->Health << "\n";
+    std::cout << "Health: " << P2->Health << "\n";
+
+    std::cout << sizeof(Player) << "\n";
+    std::cout << sizeof(arena) << "\n";
+
+    std::cout << "Size: " << arena.get_size() << "\n";
+    std::cout << "Used: " << arena.get_used() << "\n";
+    std::cout << "Remaining: " << arena.get_remaining() << "\n";
 
     P1->~Player();
+    P2->~Player();
     arena.Reset();
 
     return 0;

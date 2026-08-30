@@ -22,10 +22,17 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
     add_link_options(-fsanitize=address,undefined)
 endif()
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+endif()
 
-add_library(allocators INTERFACE)
-target_include_directories(allocators INTERFACE
+add_library(allocators
+    src/LinearAllocator.cpp
+)
+
+target_include_directories(allocators PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
 )
 
 add_executable(test_linear src/main.cpp)
