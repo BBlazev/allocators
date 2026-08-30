@@ -23,22 +23,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_link_options(-fsanitize=address,undefined)
 endif()
 
-if(ENABLE_TSAN)
-    add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
-    add_link_options(-fsanitize=thread)
-endif()
+add_library(allocators INTERFACE)
+target_include_directories(allocators INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 
-# add_library(allocators
-#     src/allocator.cpp
-# )
+add_executable(test_linear src/main.cpp)
+target_link_libraries(test_linear PRIVATE allocators)
 
-# target_include_directories(allocators PUBLIC
-#     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#     $<INSTALL_INTERFACE:include>
-# )
-
-option(BUILD_TESTS "Build tests and benchmarks" ON)
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
+option(BUILD_BENCHMARKS "Build benchmarks" ON)
+if(BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()
