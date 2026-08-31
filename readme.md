@@ -14,9 +14,9 @@ The goal is to understand how memory management actually works at a level below 
 | Stack (baseline) | 1,084 ns | – |
 | Linear | 4,429 ns | 15x vs new |
 | Pool | 44,864 ns | ~6.4x vs new |
+| Stack alloc | 5,822 ns | 13x vs new |
 | new/delete | 68,362 ns | – |
 | new/delete (churn) | 288,972 ns | – |
-
 
 
 

@@ -1,6 +1,7 @@
 #include <benchmark/benchmark.h>
 #include <allocators/LinearAllocator.hpp>
 #include <allocators/PoolAllocator.hpp>
+#include <allocators/StackAllocator.hpp>
 
 #include <algorithm>
 #include <random>
@@ -98,5 +99,24 @@ static void BM_ObjectPool_Churn(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_ObjectPool_Churn);
+
+
+static void BM_StackAllocator(benchmark::State& state){
+    StackAllocator stack(10000 * sizeof(Entity));
+
+    for(auto _ : state){
+        void* ptrs[10000];
+
+        for(int i = 0; i < 10000; ++i){
+            ptrs[i] = stack.Allocate(sizeof(Entity), alignof(Entity));
+            benchmark::DoNotOptimize(ptrs[i]);
+        }
+
+        for(int i = 9999; i >= 0; --i){
+            stack.Deallocate(ptrs[i]);
+        }
+    }
+}
+BENCHMARK(BM_StackAllocator);
 
 BENCHMARK_MAIN();

@@ -18,7 +18,7 @@ private:
 
 public:
 
-    PoolAllocator(std::size_t Size)
+    explicit PoolAllocator(std::size_t Size)
         : Capacity{Size}
         , StartPtr(new std::byte[Capacity * sizeof(T)])
     {
