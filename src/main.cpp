@@ -1,5 +1,6 @@
 #include <allocators/LinearAllocator.hpp>
 #include <allocators/PoolAllocator.hpp>
+#include <allocators/StackAllocator.hpp>
 #include <iostream>
 
 struct Player {
@@ -37,15 +38,31 @@ int main() {
     // P2->~Player();
     // arena.Reset();
 
-    PoolAllocator<Player> PlayerPool(5);
-    Player* P1 = PlayerPool.Allocate(1,100.0f);
-    Player* P2 = PlayerPool.Allocate(2,32.9f);
+    // PoolAllocator<Player> PlayerPool(5);
+    // Player* P1 = PlayerPool.Allocate(1,100.0f);
+    // Player* P2 = PlayerPool.Allocate(2,32.9f);
 
-    PlayerPool.Deallocate(P1);
+    // PlayerPool.Deallocate(P1);
 
-    Player* P3 = PlayerPool.Allocate(3, 100.0f);
+    // Player* P3 = PlayerPool.Allocate(3, 100.0f);
 
+    StackAllocator arena(102 * 1024);
+
+    Player* P1 = arena.Allocate<Player>(1, 100.0f);
+    Player* P2 = arena.Allocate<Player>(2, 100.0f);
+
+    std::cout << "ID: " << P1->ID << "\n";
+    std::cout << "ID: " << P2->ID << "\n";
+
+
+    arena.Deallocate(P2);
+    Player* P3 = arena.Allocate<Player>(3, 100.0f);
+    std::cout << "ID: " << P1->ID << "\n";
     
+    //dangling pointer
+    std::cout << "ID: " << P2->ID << "\n";
+
+    std::cout << "ID: " << P3->ID << "\n";
 
     return 0;
 }

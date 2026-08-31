@@ -95,6 +95,13 @@ class StackAllocator{
             Offset = hdrptr->BlockOffset;
         }
 
+        template<typename T>
+        void Deallocate(T* object) noexcept{
+            object->~T();
+            Deallocate(static_cast<void*>(object));
+            object = nullptr;
+        }
+
         void Reset() noexcept {
             Offset = 0;
         }
